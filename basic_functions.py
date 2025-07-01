@@ -10,12 +10,12 @@ def solar_energy(area, irradiance_kwh_day, efficiency, performance_ratio):
 # Wind output in MW - P = 0.5 × ρ × A × v³ × cd
 def wind_energy(v, rho, r, cp=0.3):
     area = np.pi * r**2
-    energy = 0.5 * rho * area * v**3 * cp
+    energy = (0.5 * rho * area * v**3 * cp)/1000000
     return energy
 
 # Hydro output in MW - P = η × ρ × g × Q × h
 def hydro_energy(efficiency, rho, g, flow_rate, head_height):
-    energy = efficiency * rho * g * flow_rate * head_height
+    energy = (efficiency * rho * g * flow_rate * head_height)/1000000
     return energy
 
 # energy distribution
