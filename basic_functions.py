@@ -1,5 +1,12 @@
 import numpy as np
 import pandas as pd
+import os
+
+BASE_DIR = Path(__file__).resolve().parent
+country_data = pd.read_csv(BASE_DIR / "countries_energy_data.csv")
+renewables_summary = pd.read_csv(BASE_DIR / "country_renewables_summary.csv")
+intermittency_data = pd.read_csv(BASE_DIR / "fft.csv")
+
 
 # -_________________________
 #Energy Output Equations
@@ -49,18 +56,18 @@ def operational_cost(units_needed, energy_dict):
         total += units_needed[source] * op_cost
     return total
 
-def land_cost(units_needed, land_priceper_m2, energy_dict):
+def land_cost(units_needed, energy_dict):
     total = 0
     for source in units_needed:
         area = energy_dict[source]["land_area"]
-        total += units_needed[source] * area * land_priceper_m2
-    return total
+        total += units_needed[source] * area
+    return total  # m²
 
 def carbon_emissions(units_needed, energy_dict):
     total = 0
     for source in units_needed:
         emissions_per_mwh = energy_dict[source]["emissions"]
-        output_per_unit = energy_dict[source].get("output")#or output per day for solar, bug
+        output_per_unit = energy_dict[source].get("output") or energy_dict[source].get("output_per_day")
         total_output = units_needed[source] * output_per_unit
         total += emissions_per_mwh * total_output
     return total
