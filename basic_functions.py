@@ -3,9 +3,11 @@ import pandas as pd
 import os
 
 BASE_DIR = Path(__file__).resolve().parent
-country_data = pd.read_csv(BASE_DIR / "countries_energy_data.csv")
-renewables_summary = pd.read_csv(BASE_DIR / "country_renewables_summary.csv")
-intermittency_data = pd.read_csv(BASE_DIR / "fft.csv")
+country_data = pd.read_csv(BASE_DIR / "hydropoints.csv")
+country_data = pd.read_csv(BASE_DIR / "solarpoints.csv")
+country_data = pd.read_csv(BASE_DIR / "windpoints.csv")
+renewables_summary = pd.read_csv(BASE_DIR / "countries_energy_data.csv")
+#intermittency_data = pd.read_csv(BASE_DIR / "fft.csv")
 
 
 # -_________________________
