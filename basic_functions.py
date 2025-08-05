@@ -28,17 +28,60 @@ def hydro_energy(efficiency, rho, g, flow_rate, head_height):
     return power
 
 # -______________________________-
-# Energy Balance
+# Objective Function (Replacing Energy Balance)
 # -________________________--------
 
-def energy_balance(total_energy_required, mix, energy_outputs):
+def objective_function(total_energy_required, mix, country_name, energy_dict, land_price_per_m2, carbon_price_per_kg=0):
+    # Get max land area allowed (30%)
+    land_data = renewables_summary.set_index("Country")
+
+    max_land_area = 0.3 * land_data.loc[country_name]["Land Area (m^2)"]
     units_needed = {}
+    total_land_used = 0
+    total_cost = 0
+    total_emissions = 0
+
     for source, share in mix.items():
+        # Skip if no intermittency
+        if share <= 0:
+            continue
+            
         target_energy = total_energy_required * share
-        output_per_unit = energy_outputs[source]
+        output_per_unit = energy_dict[source].get("output") or energy_dict[source].get("output_per_day") # For solar
+        if not output_per_unit or output_per_unit <= 0:
+            return float("inf")  # Penalize bad data
+
         units = target_energy / output_per_unit
         units_needed[source] = units
-    return units_needed
+
+        # Cost calculations
+        cap_cost = energy_dict[source]["capital_cost"]
+        op_cost = energy_dict[source]["operational_cost"]
+        land_area = energy_dict[source]["land_area"]
+        emissions = energy_dict[source]["emissions"]
+
+        total_cost += units * (cap_cost + op_cost)
+        total_land_used += units * land_area
+
+        if energy_dict[source].get("emissions_mode", "per_energy") == "per_energy":
+            # For fossil fuels etc.
+            total_emissions += units * output_per_unit * emissions
+        elif energy_dict[source]["emissions_mode"] == "per_unit":
+            # For wind/solar etc.
+            total_emissions += units * emissions
+            
+    # Land area check constraint
+    if total_land_used > max_land_area:
+        return float("inf")
+
+    # Add land cost
+    total_cost += total_land_used * land_price_per_m2
+
+    # Add carbon cost
+    if carbon_price_per_kg > 0:
+        total_cost += total_emissions * carbon_price_per_kg
+
+    return total_cost
 
 # _________________________-
 # Cost & Emissions
@@ -86,14 +129,15 @@ def total_energy_cost(units_needed, energy_dict, land_price_perm2, carbon_pricep
 # _______________________________-
 # Energy Sources Dictionary (all placeholder values)
 # _____________________________---
-
+    
 energy_dict = {
     "solar": {
         "capital_cost": 500,#$/unit
         "operational_cost": 5,#$/unit/day
         "output_per_day": 0.004,#MWh/day
         "land_area": 1.6,#m^2
-        "emissions": 0 #kgCO2/MWh
+        "emissions": 500,  # kg CO2 *per generator* for solar
+        "emissions_mode": "per_unit"
     }
     ,
     "wind": {
@@ -101,7 +145,8 @@ energy_dict = {
         "operational_cost": 30_000,#$/unit/day
         "output": 30,#MWh/day
         "land_area": 10_000,#m^2
-        "emissions": 0#kgCO2/MWh
+        "emissions": 500,  # kg CO2 *per generator* for wind
+        "emissions_mode": "per_unit"
     }
     ,
     "hydro": {
@@ -109,7 +154,8 @@ energy_dict = {
         "operational_cost": 100_000,#$/unit/day
         "output": 10,#MWh/day
         "land_area": 100_000,#m^2
-        "emissions": 5#kgCO2/MWh
+        "emissions": 500,  # kg CO2 *per generator* for wind
+        "emissions_mode": "per_unit"
     }
     ,
     "coal": {
@@ -117,7 +163,8 @@ energy_dict = {
         "operational_cost": 70_000,#$/unit/day
         "output": 120,#MWh/day
         "land_area": 5_000,#m^2
-        "emissions": 950#kgCO2/MWh
+        "emissions": 0.9,  # kg CO2 per kWh for coal
+        "emissions_mode": "per_energy"
     }
     ,
     "gas": {
@@ -125,7 +172,8 @@ energy_dict = {
         "operational_cost": 50_000,#$/unit/day
         "output": 150,#MWh/day
         "land_area": 3_000,#m^2
-        "emissions": 550#kgCO2/MWh
+        "emissions": 0.9,  # kg CO2 per kWh for gas
+        "emissions_mode": "per_energy"
     }
     ,
     "oil": {
@@ -133,7 +181,8 @@ energy_dict = {
         "operational_cost": 80_000,#$/unit/day
         "output": 110,#MWh/day
         "land_area": 4_000,#m^2
-        "emissions": 750#kgCO2/MWh
+        "emissions": 0.9,  # kg CO2 per kWh for oil
+        "emissions_mode": "per_energy"
     }
     ,
     "nuclear": {
