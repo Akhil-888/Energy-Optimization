@@ -16,6 +16,7 @@ renewables_summary = pd.read_csv(BASE_DIR / "countries_energy_data.csv")
 
 def solar_energy(area, irradiance_kwh_day, efficiency, performance_ratio):
     energy = (area * irradiance_kwh_day * efficiency * performance_ratio) / 1000  # MWh/day
+    #account for angle incident on solar panel affecting energy
     return energy
 
 def wind_energy(v, rho, r, cp=0.3):
