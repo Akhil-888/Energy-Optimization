@@ -153,7 +153,7 @@ energy_dict = {
     "hydro": {
         "capital_cost": 5_000_000,#$/unit
         "operational_cost": 100_000,#$/unit/day
-        "output": 10,#MWh/day
+        "output": 1200,#MWh/day
         "land_area": 100_000,#m^2
         "emissions": 500,  # kg CO2 *per generator* for wind
         "emissions_mode": "per_unit"
@@ -180,7 +180,7 @@ energy_dict = {
     "oil": {
         "capital_cost": 900_000,#$/unit
         "operational_cost": 80_000,#$/unit/day
-        "output": 110,#MWh/day
+        "output": 500,#MWh/day
         "land_area": 4_000,#m^2
         "emissions": 0.9,  # kg CO2 per kWh for oil
         "emissions_mode": "per_energy"
@@ -189,7 +189,7 @@ energy_dict = {
     "nuclear": {
         "capital_cost": 9_000_000,#$/unit
         "operational_cost": 300_000,#$/unit/day
-        "output": 250,#MWh/day
+        "output": 20,#MWh/day
         "land_area": 10_000,#m^2
         "emissions": 15#kgCO2/MWh
     }
