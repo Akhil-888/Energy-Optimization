@@ -28,17 +28,16 @@ class OptimizerConfig:
     population_size: int = 300
     max_generations: int = 1000
     random_seed: int = 42
-    device: str = "cuda" if torch.cuda.is_available() else "cpu"
 
 # Optimization
 class EnergyProblem(ElementwiseProblem):
     def __init__(self, config: OptimizerConfig, country_name: str, total_energy_required: float, energy_dict: dict, land_price_per_m2: float, carbon_price_per_kg: float = 0):
         super().__init__(
-            n_var=4,
+            n_var=8,
             n_obj=2,            # cost+land pressure
             n_ieq_constr=2,     # land and hydro constraint
             xl=np.array([0, 0, 0, 0]),
-            xu=np.array([1, 1, 1, 1])
+            xu=np.array([1, 1, 1, 1])#power output >= demand , <= 2*demand
         )
         self.config = config
         self.country = country_name
@@ -51,9 +50,16 @@ class EnergyProblem(ElementwiseProblem):
         self.demand = energy_summary.set_index("Country").loc[country_name]["Annual Consumption (MWh)"] / 365.0
 
     def _evaluate(self, x, out, *args, **kwargs):
-        solar, wind, hydro = x
-        mix = {"solar": solar, "wind": wind}
-
+        solar, wind, hydro = x #coal, nuclear, oil, gas
+        mix = {"solar": solar, "wind": wind, "hydro": hydro}
+"""
+Solar = x[0]
+Wind = x[1]
+model = {“Solar”: x[0], “Wind: x[1], “Nuclear” : x[2], “Coal”: x[3]}
+Demand = x[0]
+Model = {}
+Model  = {‘demand’=x[0], ‘solar’:x[1], … }
+"""
         cost = objective_function(
             self.energy_required,
             mix,
