@@ -19,8 +19,6 @@ hydro_points = pd.read_csv(BASE_DIR / "hydropoints.csv")
 solar_points = pd.read_csv(BASE_DIR / "solarpoints.csv")
 wind_points = pd.read_csv(BASE_DIR / "windpoints.csv")
 energy_summary = pd.read_csv(BASE_DIR / "countries_energy_data.csv")
-#intermittency_data = pd.read_csv(BASE_DIR / "fft.csv")
-#coal_gas_nuclear = pd.read_csv(BASE_DIR / "coal_gas_nuclear.csv")
 
 #Config
 @dataclass
