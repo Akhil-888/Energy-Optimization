@@ -7,8 +7,6 @@ country_data = pd.read_csv(BASE_DIR / "hydropoints.csv")
 country_data = pd.read_csv(BASE_DIR / "solarpoints.csv")
 country_data = pd.read_csv(BASE_DIR / "windpoints.csv")
 renewables_summary = pd.read_csv(BASE_DIR / "countries_energy_data.csv")
-#intermittency_data = pd.read_csv(BASE_DIR / "fft.csv")
-
 
 # -_________________________
 #Energy Output Equations
